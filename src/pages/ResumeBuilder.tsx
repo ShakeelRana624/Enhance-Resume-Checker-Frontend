@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
-import { CheckCircle, Zap, FileText, Layout, ShieldCheck } from "lucide-react";
+import { CheckCircle, Zap, FileText, Layout, ShieldCheck, ArrowRight } from "lucide-react";
 
 export default function ResumeBuilderPage() {
   return (
@@ -73,6 +73,83 @@ export default function ResumeBuilderPage() {
                 <div className="text-sm font-bold text-[#4A4D52] uppercase tracking-wider">{stat.label}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Template Preview Section */}
+      <section className="py-24 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0052FF]/10 text-[#0052FF] text-sm font-bold uppercase tracking-wider mb-6"
+            >
+              <Layout className="w-4 h-4" />
+              Premium Templates
+            </motion.div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold text-[#1A1C1E] mb-6">
+              Pick a <span className="text-[#0052FF]">template</span> that fits your style
+            </h2>
+            <p className="text-xl text-[#4A4D52] max-w-2xl mx-auto">
+              Recruiter-approved designs that help you stand out from the crowd. 
+              Optimized for ATS and human eyes.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {[
+              { id: 1, name: "Modern Professional", category: "Corporate", image: "https://picsum.photos/seed/resume-1/600/800" },
+              { id: 2, name: "Creative Executive", category: "Creative", image: "https://picsum.photos/seed/resume-2/600/800" },
+              { id: 3, name: "Tech Specialist", category: "Technology", image: "https://picsum.photos/seed/resume-3/600/800" },
+              { id: 4, name: "Traditional Academic", category: "Education", image: "https://picsum.photos/seed/resume-4/600/800" },
+              { id: 5, name: "Entry Level", category: "Graduate", image: "https://picsum.photos/seed/resume-5/600/800" },
+              { id: 6, name: "Minimalist", category: "Simple", image: "https://picsum.photos/seed/resume-6/600/800" },
+            ].map((template, index) => (
+              <motion.div
+                key={template.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="group relative"
+              >
+                <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl border border-gray-100 bg-gray-50 transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2">
+                  <img 
+                    src={template.image} 
+                    alt={template.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    referrerPolicy="no-referrer"
+                  />
+                  
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-[#1A1C1E]/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-8 text-center">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 scale-50 group-hover:scale-100 transition-transform duration-500">
+                      <Zap className="w-8 h-8 text-white fill-current" />
+                    </div>
+                    <h4 className="text-white text-2xl font-bold mb-2">{template.name}</h4>
+                    <p className="text-white/80 text-sm mb-8">{template.category} optimized layout</p>
+                    <button className="px-8 py-3 bg-[#0052FF] text-white font-bold rounded-full hover:bg-[#0042CC] transition-all shadow-lg shadow-[#0052FF]/20">
+                      Use this template
+                    </button>
+                  </div>
+
+                  {/* Badge */}
+                  <div className="absolute top-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-gray-100">
+                    <span className="text-xs font-bold text-[#1A1C1E] uppercase tracking-wider">{template.category}</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-20 text-center">
+            <button className="px-10 py-5 bg-[#1A1C1E] text-white text-lg font-bold rounded-full hover:bg-black transition-all flex items-center gap-3 mx-auto shadow-xl">
+              Browse all 100+ templates
+              <ArrowRight className="w-6 h-6" />
+            </button>
           </div>
         </div>
       </section>

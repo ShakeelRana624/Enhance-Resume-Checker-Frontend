@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { GoogleGenAI, Type } from '@google/genai';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
+import * as pdfjs from 'pdfjs-dist';
+import mammoth from 'mammoth';
 import { 
   FileText, 
   Target, 
@@ -16,9 +18,15 @@ import {
   Search, 
   TrendingUp, 
   ShieldCheck,
-  Star
+  Star,
+  Upload,
+  X,
+  FileUp
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+
+// Set worker path for pdfjs
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
@@ -31,6 +39,9 @@ export default function Analysis() {
   const [analysisStep, setAnalysisStep] = useState(0);
   const [report, setReport] = useState<any>(null);
   const [error, setError] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [fileName, setFileName] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const steps = [
     { icon: Search, text: "Scanning resume structure...", tooltip: "We check for proper headings, margins, and section order." },
@@ -40,10 +51,63 @@ export default function Analysis() {
     { icon: ShieldCheck, text: "Finalizing your report...", tooltip: "Compiling all insights into a comprehensive report." },
   ];
 
+  const extractTextFromFile = async (file: File) => {
+    setIsExtracting(true);
+    setError('');
+    setFileName(file.name);
+    
+    try {
+      if (file.type === 'application/pdf') {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items.map((item: any) => item.str).join(' ');
+          fullText += pageText + '\n';
+        }
+        setResumeText(fullText);
+      } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        setResumeText(result.value);
+      } else if (file.type === 'text/plain') {
+        const text = await file.text();
+        setResumeText(text);
+      } else {
+        throw new Error('Unsupported file type. Please upload PDF, DOCX, or TXT.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to extract text from file.');
+      setFileName('');
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      extractTextFromFile(file);
+    }
+  };
+
+  const clearFile = () => {
+    setFileName('');
+    setResumeText('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       navigate('/login');
+      return;
+    }
+
+    if (!resumeText.trim()) {
+      setError('Please provide your resume text or upload a file.');
       return;
     }
 
@@ -152,14 +216,76 @@ export default function Analysis() {
 
             <form onSubmit={handleAnalyze} className="space-y-8">
               <div className="space-y-4">
-                <label className="text-lg font-bold text-[#1A1C1E] block">Your Resume Text</label>
-                <textarea
-                  required
-                  value={resumeText}
-                  onChange={(e) => setResumeText(e.target.value)}
-                  className="w-full h-48 p-6 bg-gray-50 border border-gray-100 rounded-3xl focus:ring-2 focus:ring-[#0052FF] focus:border-transparent outline-none transition-all resize-none"
-                  placeholder="Paste your resume content here..."
-                />
+                <div className="flex justify-between items-end">
+                  <label className="text-lg font-bold text-[#1A1C1E] block">Your Resume</label>
+                  {fileName && (
+                    <button 
+                      type="button"
+                      onClick={clearFile}
+                      className="text-xs font-bold text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                      Clear File
+                    </button>
+                  )}
+                </div>
+                
+                {!fileName ? (
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-48 border-2 border-dashed border-gray-200 rounded-3xl flex flex-col items-center justify-center gap-4 hover:border-[#0052FF] hover:bg-[#F8FAFF] cursor-pointer transition-all group"
+                  >
+                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-[#0052FF]/10 transition-colors">
+                      {isExtracting ? (
+                        <Loader2 className="w-8 h-8 text-[#0052FF] animate-spin" />
+                      ) : (
+                        <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#0052FF] transition-colors" />
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <p className="font-bold text-[#1A1C1E]">Click to upload or drag and drop</p>
+                      <p className="text-sm text-[#4A4D52]">PDF, DOCX, or TXT (Max 5MB)</p>
+                    </div>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden" 
+                      accept=".pdf,.docx,.txt"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div className="absolute top-4 right-4 px-3 py-1 bg-[#0052FF]/10 text-[#0052FF] text-[10px] font-bold rounded-full uppercase tracking-widest">
+                      Extracted Text
+                    </div>
+                    <textarea
+                      required
+                      value={resumeText}
+                      onChange={(e) => setResumeText(e.target.value)}
+                      className="w-full h-48 p-6 bg-gray-50 border border-gray-100 rounded-3xl focus:ring-2 focus:ring-[#0052FF] focus:border-transparent outline-none transition-all resize-none font-mono text-sm"
+                      placeholder="Paste your resume content here..."
+                    />
+                    <div className="mt-2 flex items-center gap-2 text-sm text-[#4A4D52] font-medium">
+                      <FileUp className="w-4 h-4 text-[#0052FF]" />
+                      {fileName}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
+                  <div className="w-1 h-1 rounded-full bg-gray-300" />
+                  Or paste text below if you don't have a file
+                </div>
+                {!fileName && (
+                   <textarea
+                   required
+                   value={resumeText}
+                   onChange={(e) => setResumeText(e.target.value)}
+                   className="w-full h-32 p-6 bg-gray-50 border border-gray-100 rounded-3xl focus:ring-2 focus:ring-[#0052FF] focus:border-transparent outline-none transition-all resize-none"
+                   placeholder="Paste your resume content here..."
+                 />
+                )}
               </div>
 
               <div className="space-y-4">
@@ -175,8 +301,8 @@ export default function Analysis() {
 
               <button
                 type="submit"
-                disabled={isAnalyzing}
-                className="w-full py-5 bg-[#0052FF] text-white text-lg font-bold rounded-full hover:bg-[#0042CC] transition-all shadow-lg shadow-[#0052FF]/20 flex items-center justify-center gap-3"
+                disabled={isAnalyzing || isExtracting}
+                className="w-full py-5 bg-[#0052FF] text-white text-lg font-bold rounded-full hover:bg-[#0042CC] transition-all shadow-lg shadow-[#0052FF]/20 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isAnalyzing ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                   <>
@@ -299,7 +425,11 @@ export default function Analysis() {
 
             <div className="flex justify-center">
               <button
-                onClick={() => setReport(null)}
+                onClick={() => {
+                  setReport(null);
+                  setFileName('');
+                  setResumeText('');
+                }}
                 className="px-10 py-4 bg-[#1A1C1E] text-white font-bold rounded-full hover:bg-black transition-all flex items-center gap-2"
               >
                 Analyze Another Resume
