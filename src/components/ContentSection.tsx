@@ -15,27 +15,42 @@ export default function ContentSection() {
           </p>
 
           <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm mb-12">
-            <h3 className="text-xl font-bold text-[#1A1C1E] mb-6 flex items-center gap-2">
-              <CheckCircle className="w-6 h-6 text-[#0052FF]" />
-              Key areas we analyze:
-            </h3>
-            <ul className="grid sm:grid-cols-2 gap-4 list-none p-0 m-0">
-              {[
-                "ATS Compatibility",
-                "Keyword Density",
-                "Action Verbs",
-                "Formatting & Layout",
-                "Quantifiable Results",
-                "Contact Information",
-                "Professional Summary",
-                "Skills Alignment"
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-3 text-sm font-semibold text-[#1A1C1E] m-0">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#0052FF]" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-xl font-bold text-[#1A1C1E] mb-6 flex items-center gap-2">
+                  <CheckCircle className="w-6 h-6 text-[#0052FF]" />
+                  Key areas we analyze:
+                </h3>
+                <ul className="grid gap-4 list-none p-0 m-0">
+                  {[
+                    "ATS Compatibility",
+                    "Keyword Density",
+                    "Action Verbs",
+                    "Formatting & Layout",
+                    "Quantifiable Results",
+                    "Contact Information",
+                    "Professional Summary",
+                    "Skills Alignment"
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-3 text-sm font-semibold text-[#1A1C1E] m-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#0052FF]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="relative">
+                <img 
+                  src="https://picsum.photos/seed/resume-analysis-detail/400/500" 
+                  alt="Resume Analysis Detail" 
+                  className="rounded-2xl shadow-lg border border-gray-50"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute -bottom-4 -right-4 bg-[#0052FF] text-white p-4 rounded-xl shadow-xl font-bold text-sm">
+                  98% Accuracy
+                </div>
+              </div>
+            </div>
           </div>
 
           <p className="mb-12 leading-relaxed">

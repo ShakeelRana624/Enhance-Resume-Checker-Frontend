@@ -53,7 +53,7 @@ export default function FeatureGrid() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -72,6 +72,56 @@ export default function FeatureGrid() {
               </p>
             </motion.div>
           ))}
+        </div>
+
+        {/* Rich Visual Section */}
+        <div className="bg-[#1A1C1E] rounded-[3rem] p-8 sm:p-16 overflow-hidden relative">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+            <img 
+              src="https://picsum.photos/seed/abstract-tech/1200/800" 
+              alt="Abstract Tech" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
+            <div>
+              <h3 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                Data-driven insights for the <span className="text-[#0052FF]">modern job seeker</span>
+              </h3>
+              <p className="text-gray-400 text-lg mb-8 leading-relaxed">
+                Our platform uses advanced machine learning to compare your resume against millions of data points from successful hires at top companies like Google, Amazon, and Meta.
+              </p>
+              <div className="flex items-center gap-6">
+                <div className="flex -space-x-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <img 
+                      key={i}
+                      src={`https://picsum.photos/seed/user-${i}/100/100`} 
+                      alt={`User ${i}`} 
+                      className="w-12 h-12 rounded-full border-4 border-[#1A1C1E]"
+                      referrerPolicy="no-referrer"
+                    />
+                  ))}
+                </div>
+                <div className="text-white">
+                  <div className="font-bold">5M+ Users</div>
+                  <div className="text-xs text-gray-400 font-medium">Trust Enhancv</div>
+                </div>
+              </div>
+            </div>
+            <div className="relative">
+              <img 
+                src="https://picsum.photos/seed/professional-workspace/600/400" 
+                alt="Professional Workspace" 
+                className="rounded-3xl shadow-2xl border border-white/10"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute -top-6 -left-6 bg-[#0052FF] p-4 rounded-2xl shadow-xl text-white font-bold text-sm animate-pulse">
+                Live Analysis Active
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -34,13 +34,16 @@ export default function CoverLetterBuilderPage() {
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <img 
-                src="https://picsum.photos/seed/cover-letter/800/600" 
-                alt="Cover Letter Builder Interface" 
-                className="rounded-3xl shadow-2xl border border-gray-100"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-4">
+              <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl border border-gray-100">
+                <img 
+                  src="https://picsum.photos/seed/cover-letter-writing/800/600" 
+                  alt="Cover Letter Builder Interface" 
+                  className="w-full h-auto transform hover:scale-105 transition-transform duration-700"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1A1C1E]/40 to-transparent pointer-events-none" />
+              </div>
+              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-4 z-20">
                 <div className="w-12 h-12 bg-[#00C853]/10 rounded-full flex items-center justify-center">
                   <CheckCircle className="w-6 h-6 text-[#00C853]" />
                 </div>
