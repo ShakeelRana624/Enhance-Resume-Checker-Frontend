@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { auth, db } from '../firebase';
 import { motion } from 'motion/react';
 import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
@@ -22,12 +23,16 @@ export default function Signup() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       await updateProfile(user, { displayName });
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        displayName,
-        createdAt: new Date().toISOString(),
-      });
+      try {
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          email: user.email,
+          displayName,
+          createdAt: new Date().toISOString(),
+        });
+      } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}`);
+      }
       navigate('/');
     } catch (err: any) {
       setError(err.message);
