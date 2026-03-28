@@ -30,7 +30,9 @@ import {
   AlertTriangle,
   Award,
   Copy,
-  Check
+  Check,
+  Lightbulb,
+  ArrowUpRight
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -169,8 +171,8 @@ export default function Analysis() {
           {
             "score": number (0-100),
             "missingKeywords": string[],
-            "recommendations": string[],
-            "coreStrengths": string[],
+            "recommendations": [ { "title": string, "action": string, "example": string } ],
+            "coreStrengths": [ { "title": string, "evidence": string } ],
             "skillStrength": { "technical": number, "soft": number },
             "writingSuggestions": [ { "section": string, "original": string, "suggestion": string, "reason": string } ]
           }
@@ -182,8 +184,29 @@ export default function Analysis() {
             properties: {
               score: { type: Type.NUMBER },
               missingKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
-              recommendations: { type: Type.ARRAY, items: { type: Type.STRING } },
-              coreStrengths: { type: Type.ARRAY, items: { type: Type.STRING } },
+              recommendations: { 
+                type: Type.ARRAY, 
+                items: { 
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    action: { type: Type.STRING },
+                    example: { type: Type.STRING }
+                  },
+                  required: ['title', 'action', 'example']
+                } 
+              },
+              coreStrengths: { 
+                type: Type.ARRAY, 
+                items: { 
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    evidence: { type: Type.STRING }
+                  },
+                  required: ['title', 'evidence']
+                } 
+              },
               skillStrength: { 
                 type: Type.OBJECT,
                 properties: {
@@ -542,22 +565,60 @@ export default function Analysis() {
                     Verified
                   </span>
                 </div>
-                <div className="grid gap-4">
-                  {report.coreStrengths.map((strength: string, i: number) => (
+                <div className="space-y-6">
+                  {report.coreStrengths.map((strength: any, i: number) => (
                     <motion.div 
-                      key={strength}
+                      key={strength.title}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.1 }}
-                      className="flex items-center gap-4 p-4 rounded-2xl bg-[#F8FAFF] border border-gray-50 group hover:border-[#00C853]/30 transition-all"
+                      className="p-6 rounded-2xl bg-[#F8FAFF] border border-gray-50 group hover:border-[#00C853]/30 transition-all"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-[#00C853]/10 flex items-center justify-center text-[#00C853] group-hover:bg-[#00C853] group-hover:text-white transition-colors">
-                        <CheckCircle2 className="w-5 h-5" />
+                      <div className="flex items-center gap-4 mb-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#00C853]/10 flex items-center justify-center text-[#00C853] group-hover:bg-[#00C853] group-hover:text-white transition-colors">
+                          <CheckCircle2 className="w-5 h-5" />
+                        </div>
+                        <span className="text-[#1A1C1E] font-bold text-lg">{strength.title}</span>
                       </div>
-                      <span className="text-[#1A1C1E] font-bold">{strength}</span>
+                      <p className="text-[#4A4D52] text-sm leading-relaxed pl-14">
+                        {strength.evidence}
+                      </p>
                     </motion.div>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            {/* Actionable Recommendations */}
+            <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl border border-gray-100">
+              <h3 className="text-2xl font-bold text-[#1A1C1E] mb-8 flex items-center gap-3">
+                <Lightbulb className="w-7 h-7 text-[#FFD600]" />
+                Actionable Recommendations
+              </h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                {report.recommendations.map((rec: any, i: number) => (
+                  <motion.div 
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="p-8 rounded-[2rem] bg-gray-50 border border-gray-100 flex flex-col justify-between group hover:bg-white hover:shadow-xl transition-all"
+                  >
+                    <div>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-2xl bg-[#0052FF]/10 flex items-center justify-center text-[#0052FF]">
+                          <ArrowUpRight className="w-6 h-6" />
+                        </div>
+                        <h4 className="text-xl font-bold text-[#1A1C1E]">{rec.title}</h4>
+                      </div>
+                      <p className="text-[#4A4D52] mb-6 font-medium">{rec.action}</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-white border border-gray-100">
+                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Example Implementation</div>
+                      <p className="text-sm text-[#1A1C1E] italic">"{rec.example}"</p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
 
