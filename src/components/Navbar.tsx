@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
@@ -6,10 +7,10 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { name: "Resume", href: "#", hasDropdown: true },
-    { name: "Cover Letter", href: "#", hasDropdown: true },
-    { name: "Pricing", href: "#", hasDropdown: false },
-    { name: "Resources", href: "#", hasDropdown: true },
+    { name: "Resume", href: "/resume-builder", hasDropdown: true },
+    { name: "Cover Letter", href: "/cover-letter-builder", hasDropdown: true },
+    { name: "Pricing", href: "/pricing", hasDropdown: false },
+    { name: "Resume Checker", href: "/", hasDropdown: false },
   ];
 
   return (
@@ -18,25 +19,25 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <a href="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#0052FF] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">E</span>
               </div>
               <span className="text-xl font-bold text-[#1A1C1E] tracking-tight">Enhancv</span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 className="flex items-center gap-1 text-sm font-medium text-[#4A4D52] hover:text-[#0052FF] transition-colors"
               >
                 {link.name}
                 {link.hasDropdown && <ChevronDown className="w-4 h-4 opacity-50" />}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -66,13 +67,14 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 py-4 px-4 space-y-4 shadow-lg">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
+              to={link.href}
+              onClick={() => setIsOpen(false)}
               className="block text-base font-medium text-[#4A4D52] hover:text-[#0052FF] transition-colors"
             >
               {link.name}
-            </a>
+            </Link>
           ))}
           <div className="pt-4 flex flex-col gap-3">
             <button className="w-full py-3 text-center font-medium text-[#4A4D52] border border-gray-200 rounded-xl">
