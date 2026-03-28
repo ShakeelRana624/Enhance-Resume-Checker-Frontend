@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user-specific metadata and settings.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Resume": {
+      "title": "Resume",
+      "description": "Stores user resume data.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "object" },
+        "templateId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title"]
+    },
+    "CoverLetter": {
+      "title": "Cover Letter",
+      "description": "Stores user cover letter data.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title"]
+    },
+    "Analysis": {
+      "title": "Resume Analysis",
+      "description": "Stores AI analysis results for a resume.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "resumeText": { "type": "string" },
+        "jobDescription": { "type": "string" },
+        "report": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "resumeText", "jobDescription"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents."
+    },
+    "/resumes/{resumeId}": {
+      "schema": "Resume",
+      "description": "User resumes."
+    },
+    "/coverLetters/{letterId}": {
+      "schema": "CoverLetter",
+      "description": "User cover letters."
+    },
+    "/analyses/{analysisId}": {
+      "schema": "Analysis",
+      "description": "Resume analysis reports."
+    }
+  }
+}

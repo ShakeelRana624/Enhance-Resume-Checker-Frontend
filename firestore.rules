@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    function isNewDocOwner() {
+      return isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid is string && data.uid.size() > 0 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+    function isValidResume(data) {
+      return data.keys().hasAll(['userId', 'title']) &&
+             data.userId is string && data.userId.size() > 0 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100;
+    }
+    function isValidCoverLetter(data) {
+      return data.keys().hasAll(['userId', 'title']) &&
+             data.userId is string && data.userId.size() > 0 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100;
+    }
+    function isValidAnalysis(data) {
+      return data.keys().hasAll(['userId', 'resumeText', 'jobDescription']) &&
+             data.userId is string && data.userId.size() > 0 &&
+             data.resumeText is string && data.resumeText.size() > 0 &&
+             data.jobDescription is string && data.jobDescription.size() > 0;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /resumes/{resumeId} {
+      allow read: if isDocOwner();
+      allow create: if isNewDocOwner() && isValidResume(request.resource.data);
+      allow update: if isDocOwner() && isValidResume(request.resource.data) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isDocOwner();
+    }
+
+    match /coverLetters/{letterId} {
+      allow read: if isDocOwner();
+      allow create: if isNewDocOwner() && isValidCoverLetter(request.resource.data);
+      allow update: if isDocOwner() && isValidCoverLetter(request.resource.data) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isDocOwner();
+    }
+
+    match /analyses/{analysisId} {
+      allow read: if isDocOwner();
+      allow create: if isNewDocOwner() && isValidAnalysis(request.resource.data);
+      allow update: if false; // Analyses are immutable
+      allow delete: if isDocOwner();
+    }
+  }
+}

@@ -1,17 +1,31 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Menu, X, ChevronDown } from "lucide-react";
-import { cn } from "@/src/lib/utils";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, ChevronDown, LogOut, User } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { auth } from "../firebase";
+import { signOut } from "firebase/auth";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const navLinks = [
     { name: "Resume", href: "/resume-builder", hasDropdown: true },
     { name: "Cover Letter", href: "/cover-letter-builder", hasDropdown: true },
     { name: "Pricing", href: "/pricing", hasDropdown: false },
     { name: "Resume Checker", href: "/", hasDropdown: false },
+    { name: "AI Analysis", href: "/analysis", hasDropdown: false },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-100">
@@ -43,12 +57,32 @@ export default function Navbar() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <button className="text-sm font-medium text-[#4A4D52] hover:text-[#0052FF] transition-colors">
-              Log in
-            </button>
-            <button className="px-5 py-2.5 bg-[#0052FF] text-white text-sm font-semibold rounded-full hover:bg-[#0042CC] transition-all shadow-sm">
-              Sign up
-            </button>
+            {user ? (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-[#4A4D52]">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <span className="max-w-[100px] truncate">{user.displayName || user.email}</span>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="p-2 text-[#4A4D52] hover:text-red-600 transition-colors"
+                  title="Log out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login" className="text-sm font-medium text-[#4A4D52] hover:text-[#0052FF] transition-colors">
+                  Log in
+                </Link>
+                <Link to="/signup" className="px-5 py-2.5 bg-[#0052FF] text-white text-sm font-semibold rounded-full hover:bg-[#0042CC] transition-all shadow-sm">
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -77,12 +111,37 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="pt-4 flex flex-col gap-3">
-            <button className="w-full py-3 text-center font-medium text-[#4A4D52] border border-gray-200 rounded-xl">
-              Log in
-            </button>
-            <button className="w-full py-3 text-center font-semibold text-white bg-[#0052FF] rounded-xl">
-              Sign up
-            </button>
+            {user ? (
+              <>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <User className="w-5 h-5 text-[#4A4D52]" />
+                  <span className="font-medium text-[#1A1C1E]">{user.displayName || user.email}</span>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full py-3 text-center font-semibold text-white bg-red-600 rounded-xl"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  to="/login" 
+                  onClick={() => setIsOpen(false)}
+                  className="w-full py-3 text-center font-medium text-[#4A4D52] border border-gray-200 rounded-xl"
+                >
+                  Log in
+                </Link>
+                <Link 
+                  to="/signup" 
+                  onClick={() => setIsOpen(false)}
+                  className="w-full py-3 text-center font-semibold text-white bg-[#0052FF] rounded-xl"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
